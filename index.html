@@ -28,8 +28,8 @@
   <main class="page-shell">
     <section class="intro" aria-labelledby="page-title">
       <p class="eyebrow">A clearer way to get there</p>
-      <h1 id="page-title">Plan a route,<br><span>without the guesswork.</span></h1>
-      <p class="intro-copy">Choose how you travel, find your places, and get a route that makes sense.</p>
+      <h1 id="page-title">Plan Your Route</h1>
+      <p class="intro-copy">A simpler way to choose your places, select how you travel, and understand your route.</p>
     </section>
 
     <section class="planner-card" aria-label="Route planner">
@@ -73,6 +73,12 @@
                 <div class="suggestions" id="to-suggestions" aria-live="polite"></div>
               </div>
             </div>
+          </div>
+          <div class="swap-row">
+            <button class="swap-button" id="swap-locations" type="button" aria-label="Swap starting point and destination">
+              <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 6h11m-3-3 3 3-3 3M16 14H5m3-3-3 3 3 3"/></svg>
+              <span>Swap locations</span>
+            </button>
           </div>
 
           <fieldset class="travel-modes">
@@ -128,7 +134,7 @@
             </svg>
           </div>
           <h3>Your next journey starts here.</h3>
-          <p>Choose your places and travel mode. Your route details will show up here.</p>
+          <p>Enter your locations to plan a route.</p>
           <div class="empty-facts">
             <span><span class="fact-dot green"></span> Real route data</span>
             <span><span class="fact-dot orange"></span> Clear travel times</span>
@@ -152,6 +158,7 @@
             <svg id="route-shape" viewBox="0 0 600 220" role="img" aria-label="Schematic preview of the returned route"></svg>
             <div class="route-endpoints"><span id="route-start-label"></span><span id="route-end-label"></span></div>
           </div>
+          <p class="route-status" id="route-status" role="status" aria-live="polite"></p>
           <p class="route-disclaimer">Travel time is an estimate from the routing service and does not include live traffic.</p>
           <a class="map-link" id="map-link" href="https://www.openstreetmap.org/" target="_blank" rel="noopener noreferrer">
             Open location in OpenStreetMap <span aria-hidden="true">↗</span>

@@ -28,6 +28,7 @@ const planButton = document.querySelector("#plan-button");
 const emptyState = document.querySelector("#empty-state");
 const routeResult = document.querySelector("#route-result");
 const resultLoading = document.querySelector("#result-loading");
+const routeStatus = document.querySelector("#route-status");
 let lastGeocodingRequestAt = 0;
 let pendingLongWalk = null;
 let routeRequestId = 0;
@@ -43,6 +44,7 @@ Object.entries(locations).forEach(([key, location]) => {
     location.hint.textContent = "Search for this place and select a match.";
     location.hint.classList.remove("is-error");
     clearFormMessage();
+    clearRouteDisplay();
     if (pendingLongWalk) {
       pendingLongWalk = null;
       planButton.querySelector("span").textContent = "Find my route";
@@ -57,6 +59,26 @@ Object.entries(locations).forEach(([key, location]) => {
   });
 });
 
+document.querySelector("#swap-locations").addEventListener("click", () => {
+  const fromValue = locations.from.input.value;
+  const fromSelected = locations.from.selected;
+  locations.from.input.value = locations.to.input.value;
+  locations.from.selected = locations.to.selected;
+  locations.to.input.value = fromValue;
+  locations.to.selected = fromSelected;
+
+  Object.values(locations).forEach((location) => {
+    location.suggestions.replaceChildren();
+    setFieldMessage(location, location.selected
+      ? "Location selected."
+      : "Search for this place and select a match.");
+  });
+
+  pendingLongWalk = null;
+  clearRouteDisplay();
+  setFormMessage("Starting point and destination swapped. Find a new route to update the results.");
+});
+
 form.addEventListener("submit", (event) => {
   event.preventDefault();
   planRoute();
@@ -64,11 +86,9 @@ form.addEventListener("submit", (event) => {
 
 form.querySelectorAll('input[name="mode"]').forEach((input) => {
   input.addEventListener("change", () => {
-    if (pendingLongWalk) {
-      pendingLongWalk = null;
-      planButton.querySelector("span").textContent = "Find my route";
-      setFormMessage("Travel mode changed. Find a new route for your selected mode.");
-    }
+    pendingLongWalk = null;
+    clearRouteDisplay();
+    setFormMessage("Travel mode changed. Find a new route for your selected mode.");
   });
 });
 
@@ -291,6 +311,9 @@ function showRoute(route, mode) {
   const mapLink = document.querySelector("#map-link");
   mapLink.href = `https://www.openstreetmap.org/?mlat=${encodeURIComponent(locations.to.selected.lat)}&mlon=${encodeURIComponent(locations.to.selected.lon)}#map=13/${encodeURIComponent(locations.to.selected.lat)}/${encodeURIComponent(locations.to.selected.lon)}`;
   drawRouteShape(leg.shape);
+  routeStatus.textContent = mode === "pedestrian" && summary.length > WALK_WARNING_DISTANCE_KM
+    ? "Long-distance walking route shown after your confirmation."
+    : "Route calculated successfully.";
 
   emptyState.hidden = true;
   routeResult.hidden = false;
@@ -413,6 +436,16 @@ function setFormMessage(message, isError = false) {
 
 function clearFormMessage() {
   setFormMessage("");
+}
+
+function clearRouteDisplay() {
+  routeRequestId += 1;
+  resultLoading.hidden = true;
+  routeResult.hidden = true;
+  emptyState.hidden = false;
+  routeStatus.textContent = "";
+  planButton.disabled = false;
+  planButton.querySelector("span").textContent = "Find my route";
 }
 
 function setRouteLoading(isLoading) {
