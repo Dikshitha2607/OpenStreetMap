@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f4f7f5">
+  <meta name="description" content="A simple route planner prototype using OpenStreetMap data.">
+  <title>Wayfinder — Simple route planning</title>
+  <link rel="preconnect" href="https://photon.komoot.io">
+  <link rel="preconnect" href="https://valhalla1.openstreetmap.de">
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Wayfinder home">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 32 32" fill="none">
+          <path d="M16 3.5 27 9.8v12.4L16 28.5 5 22.2V9.8L16 3.5Z" stroke="currentColor" stroke-width="1.8"/>
+          <path d="m10.3 20.9 3.8-9.8 7.6 9.8-7.6-2.4-3.8 2.4Z" fill="currentColor"/>
+        </svg>
+      </span>
+      <span>wayfinder<span class="brand-period">.</span></span>
+    </a>
+    <span class="prototype-label"><span class="status-dot"></span> Route planner prototype</span>
+  </header>
+
+  <main class="page-shell">
+    <section class="intro" aria-labelledby="page-title">
+      <p class="eyebrow">A clearer way to get there</p>
+      <h1 id="page-title">Plan a route,<br><span>without the guesswork.</span></h1>
+      <p class="intro-copy">Choose how you travel, find your places, and get a route that makes sense.</p>
+    </section>
+
+    <section class="planner-card" aria-label="Route planner">
+      <div class="planner-panel">
+        <div class="section-heading">
+          <div>
+            <p class="step-label">01 <span>YOUR JOURNEY</span></p>
+            <h2>Where are you going?</h2>
+          </div>
+          <span class="required-note">All fields required</span>
+        </div>
+
+        <form id="route-form" novalidate>
+          <div class="locations">
+            <div class="route-rail" aria-hidden="true">
+              <span class="rail-point rail-start"></span>
+              <span class="rail-line"></span>
+              <span class="rail-point rail-end"></span>
+            </div>
+            <div class="location-fields">
+              <div class="location-field" data-location="from">
+                <label for="from-input">Starting point</label>
+                <div class="input-row">
+                  <input id="from-input" name="from" type="text" value="Anna Nagar, Chennai" placeholder="e.g. Anna Nagar, Chennai" autocomplete="off" required aria-describedby="from-help">
+                  <button class="search-button" type="button" data-search="from" aria-label="Find starting point">
+                    <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg>
+                  </button>
+                </div>
+                <p id="from-help" class="field-hint">Enter a place, then select a match.</p>
+                <div class="suggestions" id="from-suggestions" aria-live="polite"></div>
+              </div>
+              <div class="location-field" data-location="to">
+                <label for="to-input">Destination</label>
+                <div class="input-row">
+                  <input id="to-input" name="to" type="text" value="Marina Beach, Chennai" placeholder="e.g. Marina Beach, Chennai" autocomplete="off" required aria-describedby="to-help">
+                  <button class="search-button" type="button" data-search="to" aria-label="Find destination">
+                    <svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5"/><path d="m13 13 4 4"/></svg>
+                  </button>
+                </div>
+                <p id="to-help" class="field-hint">Enter a place, then select a match.</p>
+                <div class="suggestions" id="to-suggestions" aria-live="polite"></div>
+              </div>
+            </div>
+          </div>
+
+          <fieldset class="travel-modes">
+            <legend>How are you travelling?</legend>
+            <div class="mode-options">
+              <label class="mode-option">
+                <input type="radio" name="mode" value="auto">
+                <span class="mode-card">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 11 1.6-4.3A2.5 2.5 0 0 1 9 5h6a2.5 2.5 0 0 1 2.4 1.7L19 11m-15 0h16v7h-2v-2H6v2H4v-7Zm2 0v-1m12 1v-1M7.5 12.5h.01m9 0h.01M8 5l1 1m7-1-1 1"/></svg>
+                  <span>Car</span>
+                </span>
+              </label>
+              <label class="mode-option">
+                <input type="radio" name="mode" value="bicycle">
+                <span class="mode-card">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="16.5" r="3.5"/><circle cx="18" cy="16.5" r="3.5"/><path d="m6 16.5 4-7h3l5 7m-8-7 3 7h5m-6-10h2m3 1h2"/></svg>
+                  <span>Bike</span>
+                </span>
+              </label>
+              <label class="mode-option">
+                <input type="radio" name="mode" value="pedestrian" checked>
+                <span class="mode-card">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="13" cy="4.5" r="2"/><path d="m11 8 3-1 2 3-2 3 1 6m-4-9-3 4-3 1m8-5 4 2 2 4m-9-2-1 6"/></svg>
+                  <span>Walk</span>
+                </span>
+              </label>
+            </div>
+          </fieldset>
+
+          <p class="form-message" id="form-message" role="status" aria-live="polite"></p>
+          <button class="plan-button" id="plan-button" type="submit">
+            <span>Find my route</span>
+            <svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10h12m-5-5 5 5-5 5"/></svg>
+          </button>
+        </form>
+        <p class="provider-note">Search suggestions are requested only when you press the search button.</p>
+      </div>
+
+      <aside class="result-panel" aria-label="Route results">
+        <div class="result-topline">
+          <p class="step-label">02 <span>YOUR ROUTE</span></p>
+          <span class="live-indicator"><span></span> LIVE SERVICE</span>
+        </div>
+        <div class="empty-state" id="empty-state">
+          <div class="empty-illustration" aria-hidden="true">
+            <svg viewBox="0 0 180 130" fill="none">
+              <path d="M15 95c17-14 20-42 43-42s22 39 43 39 30-46 62-46" stroke="#c6d7cd" stroke-width="3" stroke-linecap="round" stroke-dasharray="2 8"/>
+              <path d="M36 34c0-11 8-19 18-19s18 8 18 19c0 14-18 32-18 32S36 48 36 34Z" fill="#e3eee7" stroke="#285b45" stroke-width="2"/>
+              <circle cx="54" cy="34" r="6" fill="#285b45"/>
+              <path d="M109 90c0-11 8-19 18-19s18 8 18 19c0 14-18 32-18 32s-18-18-18-32Z" fill="#f9e9d8" stroke="#bf7543" stroke-width="2"/>
+              <circle cx="127" cy="90" r="6" fill="#bf7543"/>
+              <path d="M82 68h18m-6-6 6 6-6 6" stroke="#98aa9f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3>Your next journey starts here.</h3>
+          <p>Choose your places and travel mode. Your route details will show up here.</p>
+          <div class="empty-facts">
+            <span><span class="fact-dot green"></span> Real route data</span>
+            <span><span class="fact-dot orange"></span> Clear travel times</span>
+          </div>
+        </div>
+        <div class="route-result" id="route-result" hidden>
+          <div class="result-route-label"><span class="result-mode-icon" id="result-mode-icon" aria-hidden="true"></span><span id="result-mode-label"></span></div>
+          <div class="route-summary">
+            <div>
+              <p class="summary-label">Est. travel time</p>
+              <p class="summary-value" id="result-duration">—</p>
+            </div>
+            <div class="summary-divider"></div>
+            <div>
+              <p class="summary-label">Route distance</p>
+              <p class="summary-value" id="result-distance">—</p>
+            </div>
+          </div>
+          <div class="route-visual">
+            <div class="route-visual-heading"><span>ROUTE SHAPE</span><span class="route-shape-note">Live response · schematic</span></div>
+            <svg id="route-shape" viewBox="0 0 600 220" role="img" aria-label="Schematic preview of the returned route"></svg>
+            <div class="route-endpoints"><span id="route-start-label"></span><span id="route-end-label"></span></div>
+          </div>
+          <p class="route-disclaimer">Travel time is an estimate from the routing service and does not include live traffic.</p>
+          <a class="map-link" id="map-link" href="https://www.openstreetmap.org/" target="_blank" rel="noopener noreferrer">
+            Open location in OpenStreetMap <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+        <div class="result-loading" id="result-loading" hidden role="status">
+          <span class="spinner"></span>
+          <span>Calculating your route…</span>
+        </div>
+      </aside>
+    </section>
+
+    <section class="how-it-works" aria-label="How route planning works">
+      <div class="how-item"><span class="how-number">1</span><span>Search for a place</span></div>
+      <span class="how-divider" aria-hidden="true"></span>
+      <div class="how-item"><span class="how-number">2</span><span>Choose your travel mode</span></div>
+      <span class="how-divider" aria-hidden="true"></span>
+      <div class="how-item"><span class="how-number">3</span><span>Review your route</span></div>
+    </section>
+
+    <footer class="site-footer">
+      <p>Route and place data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>.</p>
+      <p>Powered by <a href="https://photon.komoot.io/" target="_blank" rel="noopener noreferrer">Photon</a> and <a href="https://valhalla.github.io/valhalla/" target="_blank" rel="noopener noreferrer">Valhalla</a> public services.</p>
+    </footer>
+  </main>
+</body>
+</html>
